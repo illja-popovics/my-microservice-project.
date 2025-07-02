@@ -1,1 +1,53 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# Python environment variables
+.env
+.env.*
+
+# Docker
+*.log
+*.pid
+*.seed
+*.swp
+docker-compose.override.yml
+
+# Helm
+*.tgz
+charts/*/charts/
+charts/*/tmpcharts/
+
+# Terraform
+*.tfstate
+*.tfstate.*
 .terraform/
+.terraform.lock.hcl
+crash.log
+terraform.tfvars
+terraform.tfvars.json
+override.tf
+override.tf.json
+
+# Kubernetes
+.kube/
+*.kubeconfig
+
+# AWS CLI credentials (don't store!)
+.aws/
+*.pem
+
+# General system files
+.DS_Store
+Thumbs.db
+
+# VSCode or JetBrains IDE
+.vscode/
+.idea/
