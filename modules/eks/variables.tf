@@ -17,3 +17,9 @@ variable "eks_role_arn" {
   type        = string
   description = "IAM role ARN for EKS cluster"
 }
+
+variable "node_group_role_arn" {
+  description = "IAM role ARN for EKS worker nodes (node group)"
+  type        = string
+}
+

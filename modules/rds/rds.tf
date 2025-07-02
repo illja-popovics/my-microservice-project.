@@ -3,7 +3,7 @@ resource "aws_db_instance" "postgres" {
   allocated_storage  = 20
   storage_type       = "gp2"
   engine             = "postgres"
-  engine_version     = "15.3"
+  engine_version     = "17.4"
   instance_class     = "db.t3.micro"
   username           = "django_user"
   password           = "pass9764gd"

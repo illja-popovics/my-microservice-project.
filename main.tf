@@ -12,7 +12,8 @@ module "eks" {
   cluster_name  = "lesson7-cluster"
   vpc_id        = module.vpc.vpc_id
   subnet_ids    = module.vpc.public_subnet_ids
-  eks_role_arn = module.iam.eks_role_arn
+  eks_role_arn = "arn:aws:iam::146554952179:role/lesson7-eks-cluster-role"
+  node_group_role_arn = "arn:aws:iam::146554952179:role/lesson7-nodegroup-role"
 
 }
 
@@ -31,7 +32,3 @@ module "rds" {
   security_group_id  = module.vpc.rds_sg_id
 }
 
-module "iam" {
-  source     = "./modules/iam"
-  role_name  = "lesson7-eks-cluster-role"
-}

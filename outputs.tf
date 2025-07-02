@@ -4,13 +4,11 @@ output "vpc_id" {
 }
 
 output "public_subnets" {
-  description = "List of public subnet IDs"
-  value       = module.vpc.public_subnets
+  value = module.vpc.public_subnet_ids
 }
 
 output "private_subnets" {
-  description = "List of private subnet IDs"
-  value       = module.vpc.private_subnets
+  value = module.vpc.private_subnet_ids
 }
 
 output "eks_cluster_name" {
@@ -24,6 +22,6 @@ output "eks_cluster_endpoint" {
 }
 
 output "ecr_repository_url" {
-  description = "ECR repository URL"
-  value       = module.ecr.repository_url
+  value = module.ecr.django_repo_url
 }
+
