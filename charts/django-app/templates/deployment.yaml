@@ -3,18 +3,18 @@ kind: Deployment
 metadata:
   name: django-app
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: 2
   selector:
     matchLabels:
-      app: django-app
+      app: django
   template:
     metadata:
       labels:
-        app: django-app
+        app: django
     spec:
       containers:
         - name: django
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: 146554952179.dkr.ecr.eu-north-1.amazonaws.com/django-app:latest
           ports:
             - containerPort: 8000
           envFrom:
