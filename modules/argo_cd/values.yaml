@@ -1,0 +1,6 @@
+configs:
+  secret:
+    argocdServerAdminPassword: ""  # За замовчуванням буде згенеровано
+server:
+  service:
+    type: LoadBalancer

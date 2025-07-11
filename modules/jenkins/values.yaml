@@ -1,0 +1,17 @@
+controller:
+  installPlugins:
+    - kubernetes
+    - git
+    - docker-workflow
+  adminUser: admin
+  adminPassword: admin123
+agent:
+  podTemplates:
+    - name: kaniko
+      containers:
+        - name: kaniko
+          image: gcr.io/kaniko-project/executor:latest
+          command: ["/busybox/sh", "-c"]
+          args:
+            - >-
+              /kaniko/executor --context $WORKSPACE --dockerfile Dockerfile --destination $ECR_URI

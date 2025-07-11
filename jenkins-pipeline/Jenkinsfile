@@ -1,0 +1,29 @@
+pipeline {
+  agent any
+  environment {
+    ECR_URI = "aws_account_id.dkr.ecr.region.amazonaws.com/django-app"
+  }
+  stages {
+    stage('Build Docker Image') {
+      steps {
+        sh 'docker build -t $ECR_URI:latest .'
+      }
+    }
+    stage('Login to ECR') {
+      steps {
+        sh 'aws ecr get-login-password | docker login --username AWS --password-stdin $ECR_URI'
+      }
+    }
+    stage('Push to ECR') {
+      steps {
+        sh 'docker push $ECR_URI:latest'
+      }
+    }
+    stage('Update Helm Chart') {
+      steps {
+        sh 'sed -i "s/tag:.*/tag: latest/" ../charts/django-app/values.yaml'
+        sh 'git commit -am "Update image tag" && git push origin main'
+      }
+    }
+  }
+}
