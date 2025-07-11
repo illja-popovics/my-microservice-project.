@@ -1,0 +1,20 @@
+repositories:
+  - name: app-repo
+    url: https://github.com/illja-popovics/my-microservice-project..git
+    type: git
+
+applications:
+  - name: django-app
+    namespace: default
+    project: default
+    source:
+      repoURL: https://github.com/illja-popovics/my-microservice-project..git
+      targetRevision: main
+      path: charts/django-app
+    destination:
+      server: https://kubernetes.default.svc
+      namespace: default
+    syncPolicy:
+      automated:
+        prune: true
+        selfHeal: true

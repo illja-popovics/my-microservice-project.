@@ -1,58 +1,75 @@
-# Проєкт: lesson-7 — Kubernetes кластер для Django-застосунку на AWS
+# My Microservice Project on AWS (EKS + Jenkins + Argo CD)
 
-## 🔧 Використані технології
+Цей проєкт автоматизує розгортання мікросервісу з використанням:
 
-- **Terraform** — для автоматичного створення інфраструктури
-- **AWS EKS** — Kubernetes кластер
-- **Amazon ECR** — репозиторій для Docker-образів
-- **Amazon RDS** — керована база даних PostgreSQL
-- **Helm** — інструмент для деплойменту застосунків у Kubernetes
-- **AWS S3 + DynamoDB** — для збереження стану Terraform
-- **AWS IAM** — керування доступами
+- AWS EKS (Elastic Kubernetes Service)
+- Jenkins для CI
+- Argo CD для GitOps CD
 
-## 🚀 Кроки запуску проєкту
+---
 
-### 1. Ініціалізація Terraform
+🔧 Як застосувати Terraform
 
-```bash
-terraform init
+⚠️ Перед запуском переконайтесь, що у вас налаштований AWS CLI та `kubectl` має
+доступ до вашого кластеру EKS.
 
-terraform apply
+1. Ініціалізуйте Terraform: terraform init
 
-cd <папка з Django-проєктом>
-docker build -t django-app .
-aws ecr get-login-password --region eu-north-1 | docker login --username AWS <ECR_REPO>
-docker tag django-app <ECR_REPO>/django-app
-docker push <ECR_REPO>/django-app
+2. Перегляньте план змін: terraform plan
 
-cd charts/django-app
-helm upgrade --install django-app . --namespace default
+3. Застосуйте інфраструктуру: terraform apply
 
-kubectl get svc django-service
+4. Після завершення — зʼявляться вихідні змінні (Outputs) з endpoint, сабнетами,
+   URL до ECR тощо.
 
-```
+---
 
-🔐 Змінні середовища (ConfigMap)
+🧪 Як перевірити Jenkins Job
 
-```bash
-POSTGRES_PORT=5432
-POSTGRES_HOST=db POSTGRES_USER=django_user POSTGRES_DB=django_db
-POSTGRES_PASSWORD=pass9764gd
+1. Проксі доступ до Jenkins UI: kubectl port-forward svc/jenkins -n jenkins
+   8080:8080
 
-```
+2. Відкрийте у браузері: http://localhost:8080
 
-# Що реалізовано
+3. Увійдіть:
 
-✅ Створено кластер EKS через Terraform
+   - Username: admin
+   - Password: admin123 (або інші дані з terraform.tfvars)
 
-✅ Налаштовано VPC, RDS, IAM, ECR
+4. Запустіть потрібну Jenkins job вручну або дочекайтесь запуску через pipeline.
 
-✅ Завантажено Docker-образ Django до ECR
+5. Логи можна переглянути в UI або: kubectl logs -n jenkins jenkins-0 -f
 
-✅ Деплой застосунку через Helm
+---
 
-✅ Реалізовано автоматичне масштабування через HPA
+🎯 Як побачити результат в Argo CD
 
-✅ Використано ConfigMap для конфігурації середовища
+1. Проксі доступ до Argo CD UI: kubectl port-forward svc/argo-cd-argocd-server
+   -n argocd 8081:443
 
-✅ Проєкт запушено до GitHub у гілку lesson-7
+2. Відкрийте у браузері: https://localhost:8081
+
+3. Увійдіть:
+
+   - Username: admin
+   - Password: отримати з командою: kubectl -n argocd get secret
+     argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64
+     --decode
+
+4. Знайдіть свій застосунок і перевірте:
+   - чи він Healthy
+   - чи Synced
+   - чи було виконано оновлення після Jenkins build
+
+---
+
+📌 Примітки
+
+- Jenkins використовує Kaniko для білду образів і пушу в ECR
+- Argo CD автоматично оновлює Deployment при новому образі
+
+---
+
+🧹 Очистка
+
+Щоб видалити всю інфраструктуру: terraform destroy

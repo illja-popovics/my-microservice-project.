@@ -1,0 +1,20 @@
+controller:
+  JCasC:
+    configScripts:
+      welcome-message: |
+        jenkins:
+          securityRealm:
+            local:
+              allowsSignup: false
+              users:
+                - id: "admin"
+                  password: "admin123"
+          authorizationStrategy:
+            loggedInUsersCanDoAnything:
+              allowAnonymousRead: false
+  installPlugins:
+    - kubernetes
+    - git
+    - docker-workflow
+  persistence:
+    enabled: false
