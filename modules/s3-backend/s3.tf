@@ -5,7 +5,4 @@ resource "aws_s3_bucket" "tf_state" {
     enabled = true
   }
 
-  lifecycle {
-    prevent_destroy = true
-  }
 }
