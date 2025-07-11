@@ -4,6 +4,6 @@ output "jenkins_url" {
 }
 
 output "jenkins_admin_password" {
-  value       = helm_release.jenkins.metadata[0].name
+  value       = helm_release.jenkins.metadata.name
   description = "Jenkins admin password (stored in k8s secret)"
 }
