@@ -1,15 +1,22 @@
-resource "aws_db_instance" "postgres" {
-  identifier         = "lesson7-postgres"
-  allocated_storage  = 20
-  storage_type       = "gp2"
-  engine             = "postgres"
-  engine_version     = "17.4"
-  instance_class     = "db.t3.micro"
-  username           = "django_user"
-  password           = "pass9764gd"
-  db_name            = "django_db"
-  publicly_accessible = false
-  skip_final_snapshot = true
-  vpc_security_group_ids = [var.security_group_id]
-  db_subnet_group_name   = var.subnet_group_name
+resource "aws_db_instance" "this" {
+  count                     = var.use_aurora ? 0 : 1
+  identifier                = "${var.db_name}-instance"
+  allocated_storage         = 20
+  engine                    = var.engine
+  engine_version            = var.engine_version
+  instance_class            = var.instance_class
+  db_name                   = var.db_name
+  username                  = var.db_username
+  password                  = var.db_password
+  db_subnet_group_name      = aws_db_subnet_group.db.name
+  vpc_security_group_ids    = [aws_security_group.rds.id]
+  parameter_group_name      = aws_db_parameter_group.db.name
+  multi_az                  = var.multi_az
+  skip_final_snapshot       = true
+  deletion_protection       = false
+  publicly_accessible       = false
+
+  tags = {
+    Name = "${var.db_name}-instance"
+  }
 }

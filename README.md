@@ -1,75 +1,116 @@
-# My Microservice Project on AWS (EKS + Jenkins + Argo CD)
 
-Цей проєкт автоматизує розгортання мікросервісу з використанням:
+# 🛠️ my-microservice-project
 
-- AWS EKS (Elastic Kubernetes Service)
-- Jenkins для CI
-- Argo CD для GitOps CD
+Infrastructure as Code for deploying a production-ready microservice app on AWS using Terraform, EKS, Jenkins, Argo CD, ECR, RDS, and more.
 
 ---
 
-🔧 Як застосувати Terraform
+## 📦 Project Structure
 
-⚠️ Перед запуском переконайтесь, що у вас налаштований AWS CLI та `kubectl` має
-доступ до вашого кластеру EKS.
-
-1. Ініціалізуйте Terraform: terraform init
-
-2. Перегляньте план змін: terraform plan
-
-3. Застосуйте інфраструктуру: terraform apply
-
-4. Після завершення — зʼявляться вихідні змінні (Outputs) з endpoint, сабнетами,
-   URL до ECR тощо.
-
----
-
-🧪 Як перевірити Jenkins Job
-
-1. Проксі доступ до Jenkins UI: kubectl port-forward svc/jenkins -n jenkins
-   8080:8080
-
-2. Відкрийте у браузері: http://localhost:8080
-
-3. Увійдіть:
-
-   - Username: admin
-   - Password: admin123 (або інші дані з terraform.tfvars)
-
-4. Запустіть потрібну Jenkins job вручну або дочекайтесь запуску через pipeline.
-
-5. Логи можна переглянути в UI або: kubectl logs -n jenkins jenkins-0 -f
+```
+.
+├── main.tf                 # Root Terraform module
+├── backend.tf              # Remote state config (S3 + DynamoDB)
+├── outputs.tf              # Global outputs
+├── terraform.tfvars        # Custom values
+├── modules/
+│   ├── vpc/                # VPC, subnets, routing, security
+│   ├── eks/                # EKS cluster and node group
+│   ├── ecr/                # ECR repo for Docker images
+│   ├── jenkins/            # Jenkins via Helm
+│   ├── argo_cd/            # Argo CD via Helm
+│   ├── s3-backend/         # Remote state setup
+│   └── rds/                # ✅ PostgreSQL or Aurora DB
+└── charts/
+    └── django-app/         # Helm chart for Django app
+```
 
 ---
 
-🎯 Як побачити результат в Argo CD
+## 🚀 Deploy Infrastructure
 
-1. Проксі доступ до Argo CD UI: kubectl port-forward svc/argo-cd-argocd-server
-   -n argocd 8081:443
+1. **Configure Terraform backend (optional)**
+   ```bash
+   terraform init
+   ```
 
-2. Відкрийте у браузері: https://localhost:8081
+2. **Plan and apply infrastructure**
+   ```bash
+   terraform plan
+   terraform apply
+   ```
 
-3. Увійдіть:
-
-   - Username: admin
-   - Password: отримати з командою: kubectl -n argocd get secret
-     argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64
-     --decode
-
-4. Знайдіть свій застосунок і перевірте:
-   - чи він Healthy
-   - чи Synced
-   - чи було виконано оновлення після Jenkins build
-
----
-
-📌 Примітки
-
-- Jenkins використовує Kaniko для білду образів і пушу в ECR
-- Argo CD автоматично оновлює Deployment при новому образі
+3. **After deployment, outputs will include:**
+   - EKS cluster endpoint
+   - Argo CD endpoint
+   - Jenkins access info
+   - RDS endpoint
 
 ---
 
-🧹 Очистка
+## ✅ RDS Module
 
-Щоб видалити всю інфраструктуру: terraform destroy
+This module supports:
+- Regular PostgreSQL or MySQL instance
+- Aurora cluster (PostgreSQL-compatible)
+
+### 🔧 Usage
+
+```hcl
+module "rds" {
+  source             = "./modules/rds"
+  use_aurora         = true        # or false
+  subnet_group_name  = module.vpc.db_subnet_group_name
+  security_group_id  = module.vpc.rds_sg_id
+  ...
+}
+```
+
+It automatically provisions:
+- Subnet Group
+- Security Group
+- Parameter Group with:
+  - `max_connections`
+  - `log_statement`
+  - `work_mem`
+
+---
+
+## 🔧 Check Jenkins Job
+
+1. Access Jenkins:
+   ```bash
+   kubectl port-forward svc/jenkins -n jenkins 8080:8080
+   open http://localhost:8080
+   ```
+
+2. Login with credentials from Terraform output or your `values.yaml`.
+
+3. Run and monitor jobs under “Build History”.
+
+---
+
+## 🚀 View Argo CD Applications
+
+1. Access Argo CD:
+   ```bash
+   kubectl port-forward svc/argocd-server -n argocd 8080:443
+   open https://localhost:8080
+   ```
+
+2. Login:
+   - Username: `admin`
+   - Password: use this to retrieve it:
+     ```bash
+     kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+     ```
+
+3. Review deployments and sync your apps.
+
+---
+
+## 🧹 Destroy Infrastructure
+
+```bash
+terraform destroy
+```

@@ -26,24 +26,29 @@ module "s3_backend" {
 }
 
 module "rds" {
-  source             = "./modules/rds"
-  subnet_group_name  = module.vpc.db_subnet_group_name
-  security_group_id  = module.vpc.rds_sg_id
+  source          = "./modules/rds"
+  db_name         = "mydb"
+  db_username     = "admin"
+  db_password     = "admin123" # ⚠️ Use secrets manager in real scenarios
+  engine          = "postgres"
+  engine_version  = "14.9"
+  instance_class  = "db.t3.micro"
+  multi_az        = false
+  use_aurora      = false
+  vpc_id          = module.vpc.vpc_id
+  subnet_ids      = module.vpc.private_subnet_ids
 }
 
-# AUTH для доступу до кластеру
 data "aws_eks_cluster_auth" "auth" {
   name = module.eks.cluster_name
 }
 
-# Kubernetes Provider
 provider "kubernetes" {
   host                   = module.eks.cluster_endpoint
   token                  = data.aws_eks_cluster_auth.auth.token
   cluster_ca_certificate = base64decode(module.eks.cluster_ca_certificate)
 }
 
-# Helm Provider
 provider "helm" {
   kubernetes = {
     host                   = module.eks.cluster_endpoint
@@ -56,7 +61,6 @@ module "argo_cd" {
   source         = "./modules/argo_cd"
   namespace      = "argocd"
   chart_version  = "5.46.5"
-
   kube_host      = module.eks.cluster_endpoint
   kube_ca_cert   = module.eks.cluster_ca_certificate
   kube_token     = data.aws_eks_cluster_auth.auth.token
