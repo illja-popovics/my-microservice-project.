@@ -115,8 +115,3 @@ Project/
     ├── Jenkinsfile
     └── docker-compose.yaml
 ```
-
-## Формат здачі
-
-1. Посилання на GitHub з гілкою final-project
-2. Архів final*DevOps*ПрізвищеІм’я.zip з усіма файлами
