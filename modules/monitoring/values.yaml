@@ -1,0 +1,11 @@
+grafana:
+  adminPassword: admin123
+  service:
+    type: ClusterIP
+    port: 80
+  persistence:
+    enabled: false
+prometheus:
+  prometheusSpec:
+    retention: 10d
+    serviceMonitorSelectorNilUsesHelmValues: false

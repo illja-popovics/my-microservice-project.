@@ -1,75 +1,122 @@
-# My Microservice Project on AWS (EKS + Jenkins + Argo CD)
+# Final DevOps Project: AWS Infrastructure with Terraform
 
-Цей проєкт автоматизує розгортання мікросервісу з використанням:
+## Технічні вимоги
 
-- AWS EKS (Elastic Kubernetes Service)
-- Jenkins для CI
-- Argo CD для GitOps CD
+Інфраструктура: AWS з використанням Terraform
 
----
+Компоненти:
 
-🔧 Як застосувати Terraform
+- VPC
+- EKS
+- RDS (або Aurora)
+- ECR
+- Jenkins (CI)
+- Argo CD (CD)
+- Prometheus + Grafana (моніторинг)
 
-⚠️ Перед запуском переконайтесь, що у вас налаштований AWS CLI та `kubectl` має
-доступ до вашого кластеру EKS.
+## Етапи виконання
 
-1. Ініціалізуйте Terraform: terraform init
+### 1. Підготовка середовища
 
-2. Перегляньте план змін: terraform plan
+1. Клонувати репозиторій:
 
-3. Застосуйте інфраструктуру: terraform apply
+```
+git clone https://github.com/<your-name>/my-microservice-project.git
+cd my-microservice-project
+```
 
-4. Після завершення — зʼявляться вихідні змінні (Outputs) з endpoint, сабнетами,
-   URL до ECR тощо.
+2. Ініціалізувати Terraform:
 
----
+```
+terraform init
+```
 
-🧪 Як перевірити Jenkins Job
+3. Перевірити всі змінні (або створити terraform.tfvars при потребі).
 
-1. Проксі доступ до Jenkins UI: kubectl port-forward svc/jenkins -n jenkins
-   8080:8080
+### 2. Розгортання інфраструктури
 
-2. Відкрийте у браузері: http://localhost:8080
+```
+terraform apply
+```
 
-3. Увійдіть:
+Після успішного розгортання перевірте стани:
 
-   - Username: admin
-   - Password: admin123 (або інші дані з terraform.tfvars)
+```
+kubectl get all -n jenkins
+kubectl get all -n argocd
+kubectl get all -n monitoring
+```
 
-4. Запустіть потрібну Jenkins job вручну або дочекайтесь запуску через pipeline.
+### 3. Перевірка доступності сервісів
 
-5. Логи можна переглянути в UI або: kubectl logs -n jenkins jenkins-0 -f
+#### Jenkins
 
----
+```
+kubectl port-forward svc/jenkins 8080:8080 -n jenkins
+```
 
-🎯 Як побачити результат в Argo CD
+Відкрити у браузері: http://localhost:8080
 
-1. Проксі доступ до Argo CD UI: kubectl port-forward svc/argo-cd-argocd-server
-   -n argocd 8081:443
+#### Argo CD
 
-2. Відкрийте у браузері: https://localhost:8081
+```
+kubectl port-forward svc/argocd-server 8081:443 -n argocd
+```
 
-3. Увійдіть:
+Відкрити у браузері: http://localhost:8081
 
-   - Username: admin
-   - Password: отримати з командою: kubectl -n argocd get secret
-     argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64
-     --decode
+### 4. Моніторинг та метрики
 
-4. Знайдіть свій застосунок і перевірте:
-   - чи він Healthy
-   - чи Synced
-   - чи було виконано оновлення після Jenkins build
+#### Grafana
 
----
+```
+kubectl port-forward svc/grafana 3000:80 -n monitoring
+```
 
-📌 Примітки
+Відкрити у браузері: http://localhost:3000
 
-- Jenkins використовує Kaniko для білду образів і пушу в ECR
-- Argo CD автоматично оновлює Deployment при новому образі
+- Логін: admin
+- Пароль: prom-operator (або з terraform output)
 
----
+Перевірити дашборд метрик Kubernetes / Nodes / Jenkins CI.
 
-🧹 Очистка
+## Рекомендації щодо безпеки та вартості
 
-Щоб видалити всю інфраструктуру: terraform destroy
+1. Щоб уникнути додаткових витрат:
+
+```
+terraform destroy
+```
+
+2. Після повного видалення ресурси S3 та DynamoDB для бекенду також знищуються.
+   При повторному запуску їх слід створити першими.
+
+## Структура проєкту
+
+```
+Project/
+├── main.tf
+├── backend.tf
+├── outputs.tf
+├── modules/
+│   ├── s3-backend/
+│   ├── vpc/
+│   ├── ecr/
+│   ├── eks/
+│   ├── rds/
+│   ├── jenkins/
+│   ├── argo_cd/
+│   └── monitoring/
+├── charts/
+│   └── django-app/
+└── Django/
+    ├── app/
+    ├── Dockerfile
+    ├── Jenkinsfile
+    └── docker-compose.yaml
+```
+
+## Формат здачі
+
+1. Посилання на GitHub з гілкою final-project
+2. Архів final*DevOps*ПрізвищеІм’я.zip з усіма файлами

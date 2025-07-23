@@ -72,3 +72,15 @@ module "jenkins" {
   token               = data.aws_eks_cluster_auth.auth.token
   jenkins_values_file = file("${path.module}/modules/jenkins/values.yaml")
 }
+
+module "monitoring" {
+  source        = "./modules/monitoring"
+  namespace     = "monitoring"
+  chart_version = "56.6.0"
+
+  # Kubernetes auth
+  providers = {
+    helm       = helm
+    kubernetes = kubernetes
+  }
+}
